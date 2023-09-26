@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -56,7 +57,11 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+int _write(int file, char *ptr, int len)
+{
+  HAL_UART_Transmit(&huart2,(uint8_t *)ptr, len, 10);
+  return len;
+}
 /* USER CODE END 0 */
 
 /**
@@ -94,7 +99,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_UART_Transmit(&huart2, (uint8_t)"Hello word!\r\n", 14, 20);
+  for (uint8_t idx=0; idx<=0x0F;idx++)
+	  printf("IDX:0x%02X\r\n",idx);
   while (1)
   {
     /* USER CODE END WHILE */
