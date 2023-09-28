@@ -19,7 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include <stdio.h>
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -57,17 +56,32 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int _write(int file, char *ptr, int len)
-{
-  HAL_UART_Transmit(&huart2,(uint8_t *)ptr, len, 10);
-  return len;
-}
+//int _write(int file, char *ptr, int len)
+//{
+//  HAL_UART_Transmit(&huart2,(uint8_t *)ptr, len, 10);
+//  return len;
+//}
 /* USER CODE END 0 */
+uint8_t Rx_data[4]="";//Almecena los bytes
+uint8_t byte_count=0; //Contador de bytes
 
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//	HAL_UART_Receive_IT(huart, Rx_data, 4);
+//}
 /**
   * @brief  The application entry point.
   * @retval int
   */
+// This function is called when a UART reception interrupt occurs
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) //When the interruption the function is called
+{
+	// Toggle the state of the LED connected to GPIOA Pin 5
+	HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_5);
+
+	// Set up to receive the next 4 bytes of data
+	HAL_UART_Receive_IT(&huart2,Rx_data,4);
+}
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -95,20 +109,28 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  HAL_UART_Receive_IT(&huart2, Rx_data, 4);// Initiate reception of 4 bytes via UART with interrupt
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  for (uint8_t idx=0; idx<=0x0F;idx++)
-	  printf("IDX:0x%02X\r\n",idx);
+//  for (uint8_t idx=0; idx<=0x0F;idx++)
+//	  printf("IDX:0x%02X\r\n",idx);
+
   while (1)
   {
     /* USER CODE END WHILE */
+//	  HAL_UART_Receive(&huart2, Rx_data, 4, 1000);
+//	  HAL_UART_Receive_IT(&huart2, Rx_data, 4);
+//	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+//	  HAL_Delay(250);
+	 }
 
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
-}
+
+
 
 /**
   * @brief System Clock Configuration
@@ -129,13 +151,14 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
+  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
+  RCC_OscInitStruct.MSICalibrationValue = 0;
+  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
   RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 10;
+  RCC_OscInitStruct.PLL.PLLN = 20;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
   RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
@@ -153,7 +176,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -207,6 +230,7 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
@@ -234,7 +258,27 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//    // Increments the byte counter
+//	byte_count++;
+//    // Checks if 4 bytes have been received
+//    if (byte_count == 4)
+//    {
+//        // The LED toggle
+//        HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_SET);
+//        byte_count= 0;  // Reinicia el contador
+//    }
+//    else
+//    {
+//    	 HAL_GPIO_WritePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin, GPIO_PIN_RESET);
+//    }
+//
+//    // Re-enable reception for the next byte
+//    HAL_UART_Receive_IT(&huart2, Rx_data, 1);
+//
+//
+//}
 /* USER CODE END 4 */
 
 /**
