@@ -17,7 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-
+#include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -44,6 +44,8 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+ADC_HandleTypeDef hadc1;
+
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim7;
 
@@ -61,8 +63,15 @@ static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM7_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
+ADC_HandleTypeDef hadc1;
 
+TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim7;
+
+UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_tx;
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -101,6 +110,23 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	printf("Counter:%ld\r\n", counter++);
 }
 
+void update_adc_channel(uint32_t new_channel)
+{
+	ADC_ChannelConfTypeDef sConfig = {0};
+	/** Configure Regular Channel
+	  */
+	sConfig.Channel = new_channel;
+	sConfig.Rank = ADC_REGULAR_RANK_1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+	sConfig.SingleDiff = ADC_SINGLE_ENDED;
+	sConfig.OffsetNumber = ADC_OFFSET_NONE;
+	sConfig.Offset = 0;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -135,6 +161,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM7_Init();
   MX_TIM1_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_UART_Receive_IT(&huart2, rx_buffer, 1);// Initiate reception of 1 bytes via UART with interrupt
@@ -142,18 +169,37 @@ int main(void)
 
   HAL_TIM_Base_Start_IT(&htim7);
 
-  TIM1->CCR1=10;
+  TIM1->CCR1=50;
 
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  for (uint8_t idx=0; idx<=0x0F;idx++)
-	  printf("IDX:0x%02X\r\n",idx);
+//  for (uint8_t idx=0; idx<=0x0F;idx++)
+//	  printf("IDX:0x%02X\r\n",idx);
 
   while (1)
   {
+
+	  update_adc_channel(ADC_CHANNEL_1);
+	  	HAL_ADC_Start(&hadc1);
+	  	HAL_ADC_PollForConversion(&hadc1, 10);
+	  	uint16_t adc_value = HAL_ADC_GetValue(&hadc1);
+	  	HAL_ADC_Stop(&hadc1);
+
+	  	update_adc_channel(ADC_CHANNEL_2);
+	  	HAL_ADC_Start(&hadc1);
+	  	HAL_ADC_PollForConversion(&hadc1, 10);
+	  	uint16_t adc_value2 = HAL_ADC_GetValue(&hadc1);
+	  	HAL_ADC_Stop(&hadc1);
+
+	  	float adc_voltage = (adc_value / 4096.0) * 3.3;
+	  	float adc_voltage2 = (adc_value2 / 4096.0) * 3.3;
+	  	printf("ADC Reading: %f, %f\r\n", adc_voltage, adc_voltage2);
+	  	HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -208,6 +254,82 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief ADC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ADC1_Init(void)
+{
+
+  /* USER CODE BEGIN ADC1_Init 0 */
+
+  /* USER CODE END ADC1_Init 0 */
+
+  ADC_MultiModeTypeDef multimode = {0};
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC1_Init 1 */
+
+  /* USER CODE END ADC1_Init 1 */
+
+  /** Common config
+  */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
+  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hadc1.Init.LowPowerAutoWait = DISABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
+  hadc1.Init.NbrOfConversion = 2;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  hadc1.Init.OversamplingMode = DISABLE;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure the ADC multi-mode
+  */
+  multimode.Mode = ADC_MODE_INDEPENDENT;
+  if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_1;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+  sConfig.SingleDiff = ADC_SINGLE_ENDED;
+  sConfig.OffsetNumber = ADC_OFFSET_NONE;
+  sConfig.Offset = 0;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Rank = ADC_REGULAR_RANK_2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ADC1_Init 2 */
+
+  /* USER CODE END ADC1_Init 2 */
+
 }
 
 /**
