@@ -115,40 +115,40 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	printf("Counter:%ld\r\n", counter++);
 }
 
-//void rtc_alarm_config(void)
-//{
-//	RTC_DateTypeDef date;
-//	RTC_TimeTypeDef time;
-//	RTC_AlarmTypeDef alarm;
-//	date.Year= 0x23;
-//	date.Month= RTC_MONTH_OCTOBER;
-//	date.Date=0x06;
-//	date.WeekDay= RTC_WEEKDAY_FRIDAY;
-//	HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BCD);
-//
-//	time.Hours= 0x19;
-//	time.Minutes= 0x10;
-//	time.Seconds= 0x00;
-//	time.TimeFormat= RTC_HOURFORMAT_24;
-//	HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BCD);
-//
-//	alarm.Alarm= RTC_ALARM_A;
-//	alarm.AlarmTime.Hours=0x19;
-//	alarm.AlarmTime.Minutes= 0x10;
-//	alarm.AlarmTime.Seconds= 0x10;
-//
-//	alarm.AlarmTime.TimeFormat= RTC_HOURFORMAT_24;
-//	alarm.AlarmDateWeekDay= RTC_WEEKDAY_FRIDAY;
-//	alarm.AlarmDateWeekDaySel= RTC_ALARMDATEWEEKDAYSEL_WEEKDAY;
-//	alarm.AlarmMask= RTC_ALARMMASK_DATEWEEKDAY;
-//
-//	HAL_RTC_SetAlarm_IT(&hrtc, &alarm, RTC_FORMAT_BCD);
-//}
-//void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
-//{
-//	printf("Alarm !!!\r\n");
-//	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-//}
+void rtc_alarm_config(void)
+{
+	RTC_DateTypeDef date;
+	RTC_TimeTypeDef time;
+	RTC_AlarmTypeDef alarm;
+	date.Year= 0x23;
+	date.Month= RTC_MONTH_OCTOBER;
+	date.Date=0x06;
+	date.WeekDay= RTC_WEEKDAY_FRIDAY;
+	HAL_RTC_SetDate(&hrtc, &date, RTC_FORMAT_BCD);
+
+	time.Hours= 0x19;
+	time.Minutes= 0x10;
+	time.Seconds= 0x00;
+	time.TimeFormat= RTC_HOURFORMAT_24;
+	HAL_RTC_SetTime(&hrtc, &time, RTC_FORMAT_BCD);
+
+	alarm.Alarm= RTC_ALARM_A;
+	alarm.AlarmTime.Hours=0x19;
+	alarm.AlarmTime.Minutes= 0x10;
+	alarm.AlarmTime.Seconds= 0x10;
+
+	alarm.AlarmTime.TimeFormat= RTC_HOURFORMAT_24;
+	alarm.AlarmDateWeekDay= RTC_WEEKDAY_FRIDAY;
+	alarm.AlarmDateWeekDaySel= RTC_ALARMDATEWEEKDAYSEL_WEEKDAY;
+	alarm.AlarmMask= RTC_ALARMMASK_DATEWEEKDAY;
+
+	HAL_RTC_SetAlarm_IT(&hrtc, &alarm, RTC_FORMAT_BCD);
+}
+void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
+{
+	printf("Alarm !!!\r\n");
+	HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+}
 /* USER CODE END 0 */
 
 /**
@@ -203,20 +203,20 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 //  printf("Initial values: %d, %d\r\n", adc_buffer[0], adc_buffer[1]);
 
-//  rtc_alarm_config();
+  rtc_alarm_config();
   while (1)
   {
-	  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, 10);
-	  HAL_Delay(1000);
-	  uint32_t adc_channel_1 = adc_buffer[0] + adc_buffer[2] +
-			  adc_buffer[4] + adc_buffer[6] + adc_buffer[8];
-	  adc_channel_1 = adc_channel_1 / 5;
-	  uint32_t adc_channel_2 = adc_buffer[1] + adc_buffer[3] +
-	  			  adc_buffer[5] + adc_buffer[7] + adc_buffer[9];
-	  	  adc_channel_2 = adc_channel_2 / 5;
-	  printf("Average: %ld, %ld\r\n", adc_channel_1, adc_channel_2);
-//		printf("ADC Reading: %d\r\n",aver);
-//		HAL_Delay(1000);
+//	  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, 10);
+//	  HAL_Delay(1000);
+//	  uint32_t adc_channel_1 = adc_buffer[0] + adc_buffer[2] +
+//			  adc_buffer[4] + adc_buffer[6] + adc_buffer[8];
+//	  adc_channel_1 = adc_channel_1 / 5;
+//	  uint32_t adc_channel_2 = adc_buffer[1] + adc_buffer[3] +
+//	  			  adc_buffer[5] + adc_buffer[7] + adc_buffer[9];
+//	  	  adc_channel_2 = adc_channel_2 / 5;
+//	  printf("Average: %ld, %ld\r\n", adc_channel_1, adc_channel_2);
+////		printf("ADC Reading: %d\r\n",aver);
+////		HAL_Delay(1000);
 	}
 
 //	float adc_voltage2 = (adc_value2 / 4096.0) * 3.3;
